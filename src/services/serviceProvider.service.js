@@ -5,6 +5,7 @@ import {
   updateServiceProviderAction,
   createServiceProviderAction,
   findServiceWithUser,
+  findServiceProviderByServiceId,
 } from "../repository/serviceprovider.repository.js";
 
 

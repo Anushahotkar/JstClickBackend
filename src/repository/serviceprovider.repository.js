@@ -72,3 +72,8 @@ export const createServiceProviderAction = async ({ userId, serviceId, action, r
 export const findServiceWithUser = async (serviceId) => {
   return await Service.findById(serviceId).populate("user").lean();
 };
+
+// Find a ServiceProvider record by serviceId
+export const findServiceProviderByServiceId = async (serviceId) => {
+  return await ServiceProvider.findOne({ serviceId }).lean();
+};
