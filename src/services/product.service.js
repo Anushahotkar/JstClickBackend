@@ -1,0 +1,110 @@
+import { ApiError } from "../utils/ApiError.js";
+import * as repo from "../repository/product.repository.js";
+import ProductCategory from "../models/productCategory.model.js";
+
+import mongoose from "mongoose";
+
+
+// Fetch all products
+export const fetchAllProductsService = async () => {
+  return await repo.getAllProducts();
+};
+
+// Fetch product by ID
+export const fetchProductByIdService = async (id) => {
+  const product = await repo.getProductById(id);
+  if (!product) throw new ApiError(404, "Product not found");
+  return product;
+};
+
+// Add product (handle single or multiple images)
+// Add product (handle single or multiple images, category name or ID)
+// Add Product
+// Add Product
+export const addProductService = async (data, user) => {
+  const { name, category, cost, description, image } = data;
+
+  if (!name || !category || !cost || !image) {
+    throw new ApiError(400, "Name, category, cost, and image are required");
+  }
+
+  // Handle category: existing ObjectId or new category name
+  let categoryId;
+  if (mongoose.Types.ObjectId.isValid(category)) {
+    const cat = await ProductCategory.findById(category);
+    if (!cat) throw new ApiError(404, "Category not found");
+    categoryId = cat._id;
+  } else {
+    let cat = await ProductCategory.findOne({ name: category });
+    if (!cat) cat = await ProductCategory.create({ name: category ,
+      creatorModel: user.userType, // 'Admin' or 'User'
+    createdBy: user._id
+    });
+    categoryId = cat._id;
+  }
+
+  const productData = {
+    name,
+    category: categoryId,
+    cost,
+    description: description || "",
+    image, // single image
+    user: user._id,
+    userType: user.userType,
+  };
+
+  return await repo.createProduct(productData);
+};
+
+
+
+
+// Update product (handle images)
+// Update product
+export const updateProductService = async (id, data) => {
+  const updatedData = { ...data };
+  if (data.image) updatedData.image = data.image; // single image
+  const updated = await repo.updateProduct(id, updatedData);
+  if (!updated) throw new ApiError(404, "Product not found");
+  return updated;
+};
+
+// Delete product
+export const deleteProductService = async (id) => {
+  const deleted = await repo.deleteProduct(id);
+  if (!deleted) throw new ApiError(404, "Product not found");
+  return deleted;
+};
+
+// Fetch products by category
+export const fetchProductsByCategoryService = async (categoryId) => {
+  const products = await repo.getProductsByCategory(categoryId);
+  return products;
+};
+
+
+
+// ✅ Delete all products when a category is deleted
+export const deleteProductsOfCategoryService = async (categoryId) => {
+  if (!categoryId) throw new ApiError(400, "Category ID is required");
+
+  // Fetch products in this category (so we can clean up images in Cloudinary)
+  const products = await repo.getProductsByCategory(categoryId);
+
+  for (const product of products) {
+    if (product.images && Array.isArray(product.images)) {
+      for (const img of product.images) {
+        try {
+          const publicId = img.publicId || img.split("/").pop().split(".")[0]; 
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error(`❌ Failed to delete Cloudinary image for product ${product._id}:`, err.message);
+        }
+      }
+    }
+  }
+
+  // Bulk delete from DB
+  const result = await repo.deleteProductsByCategory(categoryId);
+  return result;
+};
