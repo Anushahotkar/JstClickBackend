@@ -66,3 +66,9 @@ export const createServiceProviderAction = async ({ userId, serviceId, action, r
   const provider = new ServiceProvider({ userId, serviceId, action, reason });
   return await provider.save();
 };
+
+
+
+export const findServiceWithUser = async (serviceId) => {
+  return await Service.findById(serviceId).populate("user").lean();
+};
