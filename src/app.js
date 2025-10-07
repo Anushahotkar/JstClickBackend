@@ -68,7 +68,7 @@ app.use(
 app.use('/admin', adminRoutes);
 app.use('/user', userRoutes);
 // Serve uploaded images
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // Categories API for users
 
 // Services API for users
