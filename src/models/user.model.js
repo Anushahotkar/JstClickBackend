@@ -20,23 +20,7 @@ const userSchema = new mongoose.Schema({
   otpExpiry: { type: Date },
   createdAt: { type: Date, default: Date.now },
   // 🔑 Fields specific to service providers
-  serviceDetails: {
-    typeOfService: { type: String },
-    cost: { type: Number },
-    status: {
-      type: String,
-      enum: ['Approved', 'Disapproved', 'Suspended'],
-      default: 'Disapproved',
-    },
-    ratings: {
-      type: [{
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        rating: { type: Number, min: 1, max: 5 },
-      }],
-      default: [],
-    },
-    reason: { type: String },
-  },
+ 
 });
 
 userSchema.methods.generateAuthToken = function () {

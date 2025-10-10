@@ -22,12 +22,18 @@ router.post(
   addProductCategoryController
 );
 
-router.put("/service-category/:categoryId", editCategoryController);
-router.delete("/service-category/:categoryId", deleteServiceCategoryController);
+router.put("/service-category/:categoryId",
+   editCategoryController);
+
+
+router.delete("/service-category/:categoryId",
+   deleteServiceCategoryController);
 
 router.put("/product-category/:categoryId",
-   uploadCategoryImage.fields([{ name: "image", maxCount: 1 }]), // optional  
+   uploadCategoryImage
+   .fields([{ name: "image", maxCount: 1 }]), // optional  
    editProductCategoryController);
-router.delete("/product-category/:categoryId", deleteProductCategoryController);
+router.delete("/product-category/:categoryId",
+   deleteProductCategoryController);
 
 export default router;

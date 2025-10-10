@@ -2,7 +2,7 @@ import Category from "../models/category.model.js";
 import Service from "../models/service.model.js"; 
 // repository/user/productCategory/productCategory.repository.js
 import ProductCategory from "../models/productCategory.model.js";
-
+import Product from "../models/product.model.js";
 
 
 
@@ -39,7 +39,7 @@ export const findCategoryByName = async (name) => {
 // Fetch all categories
 export const getAllCategories = async () => {
   return await Category.find()
-    .sort({ userType: -1, name: 1 }) // assuming userType field exists and Admin is prioritized
+    .sort({ createdBy: -1, name: 1 }) // assuming userType field exists and Admin is prioritized
     .lean();
 };
 
@@ -92,4 +92,14 @@ export const deleteProductCategoryById = async (id) => {
 export const getAllProductCategories = async () => {
   return await ProductCategory.find()
     .sort({ createdBy: -1, name: 1 }); // Assuming createdBy field references Admin
+};
+
+// Count services in a category
+export const countServicesInCategory = async (categoryId) => {
+  return await Service.countDocuments({ category: categoryId });
+};
+
+// Count products in a category
+export const countProductsInCategory = async (categoryId) => {
+  return await Product.countDocuments({ category: categoryId });
 };

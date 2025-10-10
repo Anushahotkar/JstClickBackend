@@ -39,7 +39,9 @@ export const addCategoryController = [
       image = uploadResult.secure_url;
     }
 
-    const category = await addCategory(name, description, image,);
+    const category = await addCategory(
+      name, description, image
+    ,req.user);
 
     return res
       .status(201)
@@ -161,8 +163,8 @@ export const deleteProductCategoryController = [
   validate(deleteProductCategorySchema, "params"),
   asyncHandler(async (req, res) => {
     const { categoryId } = req.params;
-    await deleteProductCategoryService(categoryId);
-    res.status(200).json(new ApiResponse(200, null, "Product category deleted successfully"));
+    const result=await deleteProductCategoryService(categoryId);
+    res.status(200).json(new ApiResponse(200, result, "Product category deleted successfully"));
   }),
 ];
 

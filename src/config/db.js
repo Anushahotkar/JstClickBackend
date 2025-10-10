@@ -15,9 +15,10 @@ const connectDB = async () => {
     const connectionInstance = await mongoose.connect(
       `${process.env.MONGODB_URI}/${process.env.DB_NAME}`
     );
-
+    const date=new Date();
     console.log(
       `MongoDB connected! DB Host:`
+      +date.getHours()+":"+date.getMinutes()
       //  ${connectionInstance.connection.host}`
     );
 

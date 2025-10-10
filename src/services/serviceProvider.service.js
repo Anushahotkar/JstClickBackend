@@ -6,6 +6,7 @@ import {
   createServiceProviderAction,
   findServiceWithUser,
   findServiceProviderByServiceId,
+  fetchApprovedProvidersByServiceName
 } from "../repository/serviceprovider.repository.js";
 
 
@@ -32,15 +33,30 @@ export const updateServiceProviderActionService = async (serviceId, action, reas
   const service = await findServiceWithUser(serviceId);
   if (!service) throw new ApiError(404, "Service not found");
 
-  const userId = service.user;
+  // const userId = service.user;
 
   let provider = await findServiceProviderByServiceId(serviceId);
 
   if (provider) {
     provider = await updateServiceProviderAction(provider._id, action, reason);
   } else {
+      const userId = service.user?._id || service.userId; // get userId from service or serviceDetails
     provider = await createServiceProviderAction({ userId, serviceId, action, reason });
   }
 
   return provider;
+};
+
+
+
+
+export const getApprovedProvidersByServiceNameService = async (serviceName) => {
+  if (!serviceName) throw new ApiError(400, "Service name is required");
+
+  const providers = await fetchApprovedProvidersByServiceName(serviceName);
+
+  if (!providers || providers.length === 0)
+    throw new ApiError(404, "No approved providers found for this service");
+
+  return providers;
 };

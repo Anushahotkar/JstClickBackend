@@ -12,6 +12,8 @@ deleteCategoryById,
   findProductCategoryByName,
   updateProductCategoryById,
   deleteProductCategoryById,
+  countServicesInCategory,
+  countProductsInCategory,
   getAllProductCategories, } from "../repository/category.repository.js";
 import cloudinary from "../config/cloudinary.js";
 import { deleteServicesByCategory } from "../repository/service.repository.js";
@@ -21,14 +23,20 @@ import ProductCategory from "../models/productCategory.model.js";
 
 
 
-export const addCategory = async (name, description, image) => {
+export const addCategory = async (name, description, image,user) => {
   const existingCategory = await findCategoryByName(name);
   if (existingCategory) {
     throw new ApiError(400, "Category with this name already exists");
   }
 
   // Pass the image string to Mongoose
-  const newCategory = await createCategory({name, description, image});
+  const newCategory = await createCategory({
+    name,
+     description,
+      image,
+      userType:user.userType,
+      createdBy: user._id,
+    });
   return newCategory;
 };
 
@@ -111,18 +119,25 @@ export const editCategoryService = async (categoryId, updateData, file) => {
 
 // Delete service category with cascade delete
 export const deleteServiceCategoryService = async (categoryId) => {
-  if (!categoryId) throw new ApiError(400, "Category ID is required");
+  if (!categoryId) throw new ApiError(400,
+     "Category ID is required");
 
   const category = await findCategoryById(categoryId);
   if (!category) throw new ApiError(404, "Category not found");
-
-  // Delete all associated services
-  await deleteServicesByCategory(categoryId);
+  
+const serviceCount = await countServicesInCategory(categoryId);
+let serviceWord=serviceCount>1?"services":"service";
+  if (serviceCount > 0) {
+    throw new ApiError(
+      400,
+      `Category contains ${serviceCount} ${serviceWord}. Please delete all services first.`
+    );
+  }
 
   // Delete the category itself
   await deleteCategoryById(categoryId);
 
-  return new ApiResponse(200, null, "Service category and its services deleted successfully");
+  return new ApiResponse(200, null, "Service category deleted successfully");
 };
 
 
@@ -167,8 +182,19 @@ export const editProductCategoryService = async (categoryId, updateData) => {
 // Delete product category
 export const deleteProductCategoryService = async (categoryId) => {
   const category = await findProductCategoryById(categoryId);
-  if (!category) throw new ApiError(404, "Product category not found");
+  if (!category) throw new ApiError(404,
+     "Product category not found");
+
+       const productCount = await countProductsInCategory(categoryId);
+       let productWord=productCount>1?"products":"product";
+  if (productCount > 0) {
+    throw new ApiError(
+      400,
+      `Category contains ${productCount} ${productWord}. Please delete all products first.`
+    );
+  }
 
   await deleteProductCategoryById(categoryId);
-  return category;
+  return new ApiResponse(200, null,
+     "Product category deleted successfully");
 };

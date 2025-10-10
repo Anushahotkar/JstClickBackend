@@ -7,7 +7,6 @@ export const fetchAllBookedServices = async () => {
   return await BookedService.find()
     .populate("service", "name cost category image")
     .populate("user", "firstName lastName email phone")
-    .populate("vendor", "firstName lastName email phone")
     .sort({ bookedDate: -1, bookedTime: 1 });
 };
 

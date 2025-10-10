@@ -10,7 +10,7 @@ export const viewAllBookedServices = async () => {
 
   return bookings.map(b => ({
     serviceName: b.service?.name || "N/A",
-    vendorName: b.vendor ? `${b.vendor.firstName} ${b.vendor.lastName}` : "Unassigned",
+    username: b.user ? `${b.user.firstName} ${b.user.lastName}` : "Unknown", // booked user
     status: b.status || "Upcoming",
     availedOn: b.bookedDate || b.availedOn,   // depending on schema
     completedOn: b.completedOn || null,
