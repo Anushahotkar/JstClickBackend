@@ -11,7 +11,7 @@ export const getServicesByCategory = async (categoryId) => {
   const services = await Service.find({ category: categoryId })
     .populate("category", "name")
     .populate("user", "firstName lastName email") // Better user info
-    .sort({ userType: -1, createdAt: 1 }) // ✅ Admin (userType="Admin") first, then by creation date
+    .sort({ userType: -1, createdAt: -1 }) // ✅ Admin (userType="Admin") first, then by creation date
     .lean();
 
   return services || [];

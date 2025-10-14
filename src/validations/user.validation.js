@@ -15,7 +15,7 @@ export const loginWithOtpSchema = Joi.object({
 
 export const registerUserSchema = Joi.object({
   firstName: Joi.string().min(2).max(50).required(),
-  lastName: Joi.string().min(2).max(50).required(),
+  lastName: Joi.string().min(1).max(50).required(),
   email: Joi.string().email().optional(),
   phone: phoneSchema,
   userType: Joi.string().valid("user", "admin").default("user"),

@@ -4,7 +4,17 @@ const serviceSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, default: "" },
   category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-  cost: { type: Number, default: 0 },
+  cost: { type: Number,
+     default: 0,
+    required: true,
+   },
+     // Wage type and cost
+  wageType: {
+    type: String,
+    enum: ["Hourly", "Daily"],
+    required: true,
+  },
+
   image: { type: String, default: "" },
   imagePublicId: { type: String, default: "" },
   user: {

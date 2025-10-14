@@ -9,3 +9,12 @@ export const updateBookedServiceSchema = Joi.object({
     .valid("Upcoming", "Scheduled", "Ongoing", "Completed", "Cancelled")
     .required(),
 });
+
+
+// Validate assignment of vendor to a booked service
+
+// Joi schema for assigning vendor
+export const assignVendorSchema = Joi.object({
+  bookingId: Joi.string().hex().length(24).required(),
+  vendorId: Joi.string().hex().length(24).required(),
+});

@@ -6,7 +6,7 @@ import {
   createServiceProviderAction,
   findServiceWithUser,
   findServiceProviderByServiceId,
-  fetchApprovedProvidersByServiceName
+ fetchApprovedProvidersByServiceName,
 } from "../repository/serviceprovider.repository.js";
 
 
@@ -49,7 +49,6 @@ export const updateServiceProviderActionService = async (serviceId, action, reas
 
 
 
-
 export const getApprovedProvidersByServiceNameService = async (serviceName) => {
   if (!serviceName) throw new ApiError(400, "Service name is required");
 
@@ -60,3 +59,4 @@ export const getApprovedProvidersByServiceNameService = async (serviceName) => {
 
   return providers;
 };
+

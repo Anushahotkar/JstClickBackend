@@ -98,46 +98,59 @@ export const findServiceProviderByServiceId = async (serviceId) => {
   .lean();
 };
 
+
 // Fetch approved providers (users/admin) by service name
 export const fetchApprovedProvidersByServiceName = async (serviceName) => {
-  // Find service(s) by name
-  const services = await Service
-  .find({ name: serviceName }).lean();
+  if (!serviceName) return [];
+
+  // Fetch all services with this name
+  const services = await Service.find({ name: serviceName }).lean();
   if (!services || services.length === 0) return [];
 
   const serviceIds = services.map(s => s._id);
 
-  // Fetch approved ServiceProvider records
+  // 1️⃣ Approved User providers (exclude Admin)
   const approvedProviders = await ServiceProvider.find({
     serviceId: { $in: serviceIds },
     action: "Approved",
   })
-    .populate("userId", "firstName lastName phone") // populate user info
+    .populate("userId", "firstName lastName phone userType")
     .lean();
 
-  // Map users
-  const users = approvedProviders.map(sp => {
-    const user = sp.userId;
-    return {
-      _id: user?._id,
-      name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Unknown",
-      phone: user?.phone || null,
-      rating: 5, // static rating
+  const users = approvedProviders
+    .filter(sp => sp.userId.userType !== "Admin")
+    .map(sp => ({
+      _id: sp.userId._id,
+      name: `${sp.userId.firstName || ""} ${sp.userId.lastName || ""}`.trim() || "Unknown",
+      phone: sp.userId.phone,
+      rating: 0,
       type: "User",
+    }));
 
-    };
-  });
+  // 2️⃣ Admin providers: include any admin who has a service with this name
+  const adminProviders = [];
+  for (const service of services) {
+    if (service.userType === "Admin") {
+      const admin = await Admin.findById(service.user).select("firstName lastName phone").lean();
+      if (admin) {
+        adminProviders.push({
+          _id: admin._id,
+          name: `${admin.firstName} ${admin.lastName}`,
+          phone: admin.phone,
+          rating: 5,
+          type: "Admin",
+        });
+      }
+    }
+  }
 
-  // Add Admin (JustCliq) as static provider
-  const admins = await Admin.find().select("firstName lastName phone").lean();
-  const adminProviders = admins.map(a => ({
-    _id: a._id,
-    name: `${a.firstName} ${a.lastName}`,
-    phone: a.phone,
-    rating: 5, // static rating
-    type: "Admin",
-   
-  }));
+  // Remove duplicate admins if multiple services exist
+  const adminMap = new Map();
+  adminProviders.forEach(a => adminMap.set(a._id.toString(), a));
 
-  return [...users, ...adminProviders];
+  return [...users, ...Array.from(adminMap.values())];
 };
+
+
+
+

@@ -2,15 +2,12 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import * as service from "../services/serviceOrder.service.js";
 import { validate } from "../middlewares/validate.js";
-import { updateBookedServiceSchema } from "../validations/serviceOrder.validator.js";
+import { updateBookedServiceSchema
+  ,assignVendorSchema } from "../validations/serviceOrder.validator.js";
 
 import Joi from "joi";
 
-// Joi schema for assignment
-export const assignVendorSchema = Joi.object({
-  bookingId: Joi.string().hex().length(24).required(),
-  vendorId: Joi.string().hex().length(24).required(),
-});
+
 
 // Controller: get all bookings
 export const getAllBookedServicesController = asyncHandler(async (req, res) => {
@@ -28,12 +25,15 @@ export const getBookedServiceByIdController = [
   }),
 ];
 
-// Controller: assign vendor/admin
+// POST /admin/api/serviceOrder/assign-vendor
 export const assignVendorController = [
   validate(assignVendorSchema, "body"),
   asyncHandler(async (req, res) => {
-    const { bookingId, vendorId } = req.body;
-    const updatedBooking = await service.assignVendorToBookingService(bookingId, vendorId);
+    const { bookingId, vendorId } = req.validatedBody;
+    const adminId = req.user._id; // Admin assigning the vendor
+
+    const updatedBooking = await service.assignVendorToBookingService(bookingId, vendorId, adminId);
+
     res.json(new ApiResponse(200, updatedBooking, "Vendor/Admin assigned successfully"));
   }),
 ];
@@ -51,3 +51,52 @@ export const updateBookedServiceStatusController = [
     res.json(new ApiResponse(200, updatedBooking, "Booked service updated successfully"));
   }),
 ];
+
+// Vendor accepts
+export const vendorAcceptController = asyncHandler(async (req, res) => {
+  const { bookingId } = req.body;
+  const vendorId = req.user._id;
+  const booking = await service.vendorAcceptBooking(bookingId, vendorId);
+  res.json(
+    new ApiResponse(
+      200,
+      booking,
+      "Booking accepted, status updated to Scheduled"
+    )
+  );
+});
+
+// Vendor rejects
+export const vendorRejectController = asyncHandler(async (req, res) => {
+  const { bookingId } = req.body;
+  const vendorId = req.user._id;
+  const booking = await service.vendorRejectBooking(bookingId, vendorId);
+  res.json(
+    new ApiResponse(
+      200,
+      booking,
+      "Booking rejected, status updated to Cancelled"
+    )
+  );
+});
+
+// User completes booking
+export const completeBookingController = asyncHandler(async (req, res) => {
+  const { bookingId } = req.body;
+  const booking = await service.completeBookingByUser(bookingId);
+  res.json(
+    new ApiResponse(
+      200,
+      booking,
+      "Booking completed successfully, status updated to Completed"
+    )
+  );
+});
+
+
+export const getBookingsController = asyncHandler(async (req, res) => {
+  const bookings = await service.getBookingsService();
+  return res.status(200).json(
+    new ApiResponse(200, bookings, "All booked services fetched successfully")
+  );
+});

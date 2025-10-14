@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import {
 getServiceProvidersListService,
   updateServiceProviderActionService,
-getApprovedProvidersByServiceNameService
+getApprovedProvidersByServiceNameService,
 } from "../services/serviceProvider.service.js";
 import { validate } from "../middlewares/validate.js";
 import { updateServiceProviderActionSchema } from "../validations/serviceProvider.validation.js";
@@ -36,15 +36,17 @@ export const updateServiceProviderActionController = [
 // GET /user/service-providers
 
 
+
 // GET /user/service-providers/by-name/:serviceName
 export const getApprovedProvidersByServiceNameController = asyncHandler(
   async (req, res) => {
     const { serviceName } = req.params;
     const providers = await getApprovedProvidersByServiceNameService(serviceName);
-console.log(providers);
+
     return res.status(200).json(
       new ApiResponse(200, providers, `Approved providers for '${serviceName}' fetched successfully`)
     );
   }
 );
+
 
