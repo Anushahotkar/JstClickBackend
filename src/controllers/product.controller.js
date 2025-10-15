@@ -9,6 +9,7 @@ import {
   updateProductSchema,
   getProductSchema,
   getProductsByCategorySchema,
+  getProductCategorySchema,
 } from "../validations/product.validation.js";
 
 
@@ -72,3 +73,13 @@ export const deleteProductsByCategoryController = asyncHandler(async (req, res) 
   const result = await service.deleteProductsOfCategoryService(categoryId);
   res.json(new ApiResponse(200, result, "All products in category deleted successfully"));
 });
+
+// Controller
+export const getCategoryNameByProductController = [
+  validate(getProductCategorySchema, "params"),
+  asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+    const result = await service.fetchCategoryNameByProductService(productId);
+    res.json(new ApiResponse(200, result, "Category name fetched successfully"));
+  }),
+];

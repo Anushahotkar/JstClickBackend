@@ -1,5 +1,7 @@
 import Product from "../models/product.model.js";
 
+
+
 // Fetch all products
 export const getAllProducts = async () =>
   Product.find()
@@ -33,4 +35,13 @@ export const getProductsByCategory = async (categoryId) =>
 // Delete all products by category
 export const deleteProductsByCategory = async (categoryId) => {
   return await Product.deleteMany({ category: categoryId });
+};
+
+// Fetch category name by product ID
+export const getCategoryNameByProductId = async (productId) => {
+  const product = await Product.findById(productId)
+    .populate("category", "name") // only fetch the category name
+    .lean();
+
+  return product?.category?.name || null;
 };

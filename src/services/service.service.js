@@ -6,6 +6,7 @@ import {
   updateServiceById,
   deleteServicesByCategory,
   deleteServiceById,
+  getServiceWithCategory,
 } from "../repository/service.repository.js";
 import Category from "../models/category.model.js";
 import cloudinary from "../config/cloudinary.js";
@@ -20,10 +21,10 @@ export const fetchServicesByCategoryService = async (categoryId) => {
 // Add service
 // Add a service
 export const addUserServiceService = async (userId, userType, serviceData, file) => {
-  const { name, description, category, cost } = serviceData;
+  const { name, description, category, cost,wageType} = serviceData;
 
-  if (!name || !category || !cost) {
-    throw new ApiError(400, "Name, category, and cost are required");
+  if (!name || !category || !cost|| !wageType) {
+    throw new ApiError(400, "Name, category, wageType and cost are required");
   }
 
   let categoryId;
@@ -48,6 +49,7 @@ export const addUserServiceService = async (userId, userType, serviceData, file)
     description: description || "",
     category: categoryId,
     cost,
+     wageType,
     user: userId,
     userType,
     image: file?.path || "",       // single image
@@ -75,6 +77,15 @@ export const updateServiceService = async (serviceId, updateData, file) => {
   if (updateData.cost !== undefined) {
     safeUpdateData.cost = parseFloat(updateData.cost) || service.cost;
   }
+  
+  if (updateData.wageType) {
+    // Validate wageType enum
+    if (!["Hourly", "Daily"].includes(updateData.wageType)) {
+      throw new ApiError(400, 'wageType must be "Hourly" or "Daily"');
+    }
+    safeUpdateData.wageType = updateData.wageType;
+  }
+
 
   // Handle category
   if (updateData.category) {
@@ -170,4 +181,18 @@ export const getServiceProvidersListService = async () => {
       reason: provider.reason || '',        // fallback if undefined
     };
   });
+};
+
+export const fetchServiceCategoryService = async (serviceId) => {
+  const service = await getServiceWithCategory(serviceId);
+  if (!service) throw new ApiError(404, "Service not found");
+
+  if (!service.category) throw new ApiError(404, "Category not found for this service");
+
+  return {
+    // serviceId: service._id,
+    // serviceName: service.name,
+    // categoryId: service.category._id,
+    categoryName: service.category.name
+  };
 };

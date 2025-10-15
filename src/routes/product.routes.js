@@ -6,7 +6,9 @@ import { Router } from "express";
 import { attachFileToBody } from "../middlewares/attachFileToBody.js";
 import { verifyJWT } from "../middlewares/authMiddleware.js";
 // import { upload } from "../middlewares/uploadMiddleware.js";
-import { getProductsByCategoryController,addProduct,getProductController } from "../controllers/product.controller.js";
+import { getProductsByCategoryController
+  ,addProduct,getProductController
+  ,getCategoryNameByProductController } from "../controllers/product.controller.js";
 import upload from "../middlewares/uploadProduct.js";
 
 
@@ -25,7 +27,9 @@ router.post(
   addProduct
 );
 
-
+// GET category name for a product
+router.get("/product/:productId/category"
+  , getCategoryNameByProductController);
 // Protected route: only users
 router.get("/:productId", getProductController);
 

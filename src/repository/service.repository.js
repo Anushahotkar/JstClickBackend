@@ -46,3 +46,10 @@ export const deleteServicesByCategory = async (categoryId) => {
 export const deleteServiceById = async (serviceId) => {
   return await Service.findByIdAndDelete(serviceId);
 };
+
+// Fetch service by ID and populate category
+export const getServiceWithCategory = async (serviceId) => {
+  return await Service.findById(serviceId)
+    .populate("category", "name") // Only fetch category name
+    .lean();
+};

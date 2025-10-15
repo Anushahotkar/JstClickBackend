@@ -5,13 +5,16 @@ import {
   addUserServiceService,
   updateServiceService,
   deleteServiceService,
-  getServiceProvidersListService
+  getServiceProvidersListService,
+   fetchServiceCategoryService,
 } from "../services/service.service.js";
 import { validate } from "../middlewares/validate.js";
 import {
   getServicesByCategorySchema,
   createServiceSchema,
   serviceIdSchema,
+  updateServiceSchema,
+  getServiceCategorySchema,
 } from "../validations/service.validation.js";
 import Category from "../models/category.model.js";
 
@@ -42,6 +45,7 @@ export const addUserServiceController = [
       description: req.body.description?.trim(),
       category: req.body.category?.trim(),
       cost: parseFloat(req.body.cost),
+      wageType: req.body.wageType, // "Hourly" or "Daily"
     };
 
     const newService = await addUserServiceService(userId, userType, serviceData, file);
@@ -57,6 +61,7 @@ export const addUserServiceController = [
 // ✅ Update Service Controller
 export const updateServiceController = [
   validate(serviceIdSchema, "params"),
+   validate(updateServiceSchema, "body"),
   asyncHandler(async (req, res) => {
     const { serviceId } = req.params;
     const file = req.file;
@@ -88,3 +93,13 @@ export const getServiceProvidersList = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, serviceProviders, 'Service providers list fetched successfully.'));
 });
+
+export const getServiceCategoryController = [
+  validate(getServiceCategorySchema, "params"),
+  asyncHandler(async (req, res) => {
+    const { serviceId } = req.params;
+    const result = await fetchServiceCategoryService(serviceId);
+
+    res.status(200).json(new ApiResponse(200, result, "Category fetched successfully"));
+  }),
+];

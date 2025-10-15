@@ -4,6 +4,12 @@ import ProductCategory from "../models/productCategory.model.js";
 
 import mongoose from "mongoose";
 
+// Map unit to dynamic field
+const unitFieldMap = {
+  quantity: "quantity",
+  kg: "weight",
+  liters: "volume",
+};
 
 // Fetch all products
 export const fetchAllProductsService = async () => {
@@ -22,10 +28,14 @@ export const fetchProductByIdService = async (id) => {
 // Add Product
 // Add Product
 export const addProductService = async (data, user) => {
-  const { name, category, cost, description, image } = data;
+  const { name, category, cost, description, image, unit } = data;
 
-  if (!name || !category || !cost || !image) {
-    throw new ApiError(400, "Name, category, cost, and image are required");
+  if (!name || !category || !cost || !image|| !unit) {
+    throw new ApiError(400, "Name, category, cost, unit and image are required");
+  }
+  const dynamicField = unitFieldMap[unit];
+  if (!dynamicField || data[dynamicField] === undefined || data[dynamicField] <= 0) {
+    throw new ApiError(400, `${dynamicField} is required and must be positive when unit is '${unit}'`);
   }
 
   // Handle category: existing ObjectId or new category name
@@ -49,8 +59,10 @@ export const addProductService = async (data, user) => {
     cost,
     description: description || "",
     image, // single image
+    unit,
     user: user._id,
     userType: user.userType,
+    [dynamicField]: data[dynamicField],
   };
 
   return await repo.createProduct(productData);
@@ -63,8 +75,20 @@ export const addProductService = async (data, user) => {
 // Update product
 export const updateProductService = async (id, data) => {
   const updatedData = { ...data };
-  if (data.image) updatedData.image = data.image; // single image
-  const updated = await repo.updateProduct(id, updatedData);
+  if (data.image) updatedData
+  .image = data.image; // single image
+
+
+  if (updatedData.unit) {
+    const dynamicField = unitFieldMap[updatedData.unit];
+    if (!dynamicField || updatedData[dynamicField] === undefined || updatedData[dynamicField] <= 0) {
+      throw new ApiError(400,
+         `${dynamicField} is required and must be positive when unit is '${updatedData.unit}'`);
+    }
+  }
+
+  const updated = await repo
+  .updateProduct(id, updatedData);
   if (!updated) throw new ApiError(404, "Product not found");
   return updated;
 };
@@ -107,4 +131,14 @@ export const deleteProductsOfCategoryService = async (categoryId) => {
   // Bulk delete from DB
   const result = await repo.deleteProductsByCategory(categoryId);
   return result;
+};
+
+
+export const fetchCategoryNameByProductService = async (productId) => {
+  if (!productId) throw new ApiError(400, "Product ID is required");
+
+  const categoryName = await repo.getCategoryNameByProductId(productId);
+  if (!categoryName) throw new ApiError(404, "Category not found for this product");
+
+  return { categoryName };
 };
