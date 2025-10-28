@@ -137,8 +137,15 @@ export const deleteProductsOfCategoryService = async (categoryId) => {
 export const fetchCategoryNameByProductService = async (productId) => {
   if (!productId) throw new ApiError(400, "Product ID is required");
 
-  const categoryName = await repo.getCategoryNameByProductId(productId);
-  if (!categoryName) throw new ApiError(404, "Category not found for this product");
+  const product = await repo.getProductWithCategory(productId);
+  if (!product) throw new ApiError(404, "Product not found");
+  if (!product.category || !product.category.name)
+    throw new ApiError(404, "Category not found for this product");
 
-  return { categoryName };
+   return {
+    serviceId: product._id,
+    // serviceName: service.name,
+    categoryId: product.category._id,
+    categoryName: product.category.name
+  };
 };

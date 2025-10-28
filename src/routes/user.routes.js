@@ -14,7 +14,7 @@ import orderRoutes from "./order.routes.js";
 import {
   updateBookedServiceStatusController,
 } from "../controllers/serviceOrder.controller.js";
-
+import cartRoutes from "./cart.routes.js";
 const router = Router();
 
 // Unprotected route
@@ -40,6 +40,7 @@ router.put("/profile",upload.single("profileImage"), updateProfile);
 router.use('/api/products', productRoutes);
 router.use('/api/bookings', bookingRoutes);
 router.use('/api/orders', orderRoutes);
+router.use('/cart',cartRoutes);
 
 // Only authenticated users can update
 router.patch("/update-status",  updateBookedServiceStatusController);

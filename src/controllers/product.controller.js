@@ -19,6 +19,7 @@ import {
 export const addProduct = [
   validate(addProductSchema,"body"),
  asyncHandler(async (req, res) => {
+   console.log("🚀 req.validatedBody:", req.validatedBody);
     const product = await service.addProductService(req.validatedBody, req.user);
     res.status(201).json(new ApiResponse(201, product, "Product added successfully"));
   }),

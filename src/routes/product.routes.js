@@ -22,8 +22,16 @@ router.get("/products/:categoryId", getProductsByCategoryController);
 // Only authenticated Users can add products
 router.post(
   "/products",
+
   upload.single("image"), // single image field // field name = "images"
-  attachFileToBody("image"),     // attach to req.body.image
+  (req, res, next) => {
+    console.log("🚀 req.file from Multer:", req.file);
+    next();
+  },
+  // (req, res, next) => console.log("🚀 Incoming request body after upload:", req.body),
+  attachFileToBody("image"),
+    //  (req, res, next) => console.log("🚀 Incoming request body after attachFileToBody and upload:", req.body),
+   // attach to req.body.image
   addProduct
 );
 

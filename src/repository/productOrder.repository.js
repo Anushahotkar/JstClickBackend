@@ -1,26 +1,87 @@
-import Order from "../models/productOrder.model.js";
+import ProductOrder from "../models/productOrder.model.js";
+import Product from "../models/product.model.js";
 
-export const fetchOrdersWithUsersAndVendors = async (startDate, endDate) => {
+export const fetchOrdersWithUsersAndVendors = async (startDate, endDate,status) => {
   const filter = {};
   if (startDate || endDate) {
     filter.orderDate = {};
     if (startDate) filter.orderDate.$gte = startDate;
     if (endDate) filter.orderDate.$lte = endDate;
   }
+ if (status) filter.status = status;
 
-  return await Order.find(filter)
+
+return await ProductOrder.find(filter)
     // Fetch the user who placed the order
-    .populate("user", "firstName lastName email")
-
-    // Fetch product details and dynamically populate vendor
+    // .select("vendor productName quantity cost orderedOn status") // only needed fields
+   .populate({
+        path: "customer",
+        select: "firstName lastName",
+      })
     .populate({
-      path: "products.product",
-      select: "name cost user userType",
-      populate: {
-        path: "user",
-        select: "firstName lastName email",
-        model: doc => doc.userType // dynamically choose User or Admin
-      }
+      path: "vendor",
+      select: "firstName lastName",
+      
     })
-    .sort({ orderDate: -1 });
+    .populate({
+      path: "product",
+      select: "name",
+    })
+    .sort({ orderedOn: -1 }); // latest orders first
+};
+
+
+export const findProductByNameWithUser = async (productName) => {
+  return await Product.find({ name: productName })
+    .populate({
+      path: "user",
+      select: "firstName lastName phone userType",
+    })
+    .lean();
+};
+
+export const assignVendorToOrder = async (orderId, vendorId, vendorType) => {
+  return await ProductOrder.findByIdAndUpdate(
+    orderId,
+    {
+      vendor: vendorId,
+      vendorType,
+      status: "Out for Delivery",
+    },
+    { new: true } // Return updated document
+  )
+    .populate({
+      path: "vendor",
+      select: "firstName lastName",
+    })
+    .populate({
+      path: "product",
+      select: "name",
+    });
+};
+
+
+/**
+ * Mark as Delivered (when user gives feedback)
+ */
+export const markAsDelivered = async (orderId) => {
+  return await ProductOrder.findByIdAndUpdate(
+    orderId,
+    { status: "Delivered" },
+    { new: true }
+  );
+};
+
+/**
+ * Cancel order (user or vendor)
+ */
+export const cancelOrder = async (orderId, cancelledBy) => {
+  return await ProductOrder.findByIdAndUpdate(
+    orderId,
+    {
+      status: "Not Delivered",
+      cancelledBy,
+    },
+    { new: true }
+  );
 };

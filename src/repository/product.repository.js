@@ -38,10 +38,11 @@ export const deleteProductsByCategory = async (categoryId) => {
 };
 
 // Fetch category name by product ID
-export const getCategoryNameByProductId = async (productId) => {
-  const product = await Product.findById(productId)
+export const getProductWithCategory = async (productId) => {
+ return  await Product.findById(productId)
     .populate("category", "name") // only fetch the category name
+    .select("_id category")
     .lean();
 
-  return product?.category?.name || null;
+  // return product?.category?.name || null;
 };

@@ -19,6 +19,7 @@ import serviceProviderRoutes from "./serviceProvider.routes.js";
 import productVendorListRoutes from "./productVendor.routes.js";
 import serviceOrderRoutes from "./serviceOrder.routes.js";
 import productOrderRoutes from "./productOrder.routes.js";
+import stockRoutes from './stock.routes.js';
 
 const router = Router();
 
@@ -44,6 +45,7 @@ router.use('/api/services', serviceRoutes);
 router.use('/api/products', productRoutes);
 router.use("/api/serviceOrder",serviceOrderRoutes);
 router.use("/api/productOrder",productOrderRoutes);
+router.use("/stock",stockRoutes);
 // Route to get the list of all service providers.
 // It requires JWT validation to ensure only authorized users can access it.
 

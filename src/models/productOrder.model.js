@@ -68,10 +68,21 @@ const productOrderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+    
   },
 },
 {
   timestamps: true,
+   toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+});
+
+// ✅ Virtual field for vendor full name
+productOrderSchema.virtual("vendorName").get(function () {
+  if (this.vendor && this.vendor.firstName && this.vendor.lastName) {
+    return `${this.vendor.firstName} ${this.vendor.lastName}`;
+  }
+  return null;
 });
 
 export default mongoose.model("ProductOrder", productOrderSchema);

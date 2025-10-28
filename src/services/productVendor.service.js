@@ -7,33 +7,36 @@ import { calculateAverageRating } from "../utils/rating.utils.js";
 export const fetchProductVendorsService = async () => {
   const products = await repo.getAllProductVendors();
 
-  const vendorsMap = new Map();
+return products;
+};
 
-  products.forEach(product => {
-    const user = product.user;
-    if (!user) return;
 
-    const userId = user._id.toString();
+export const createProductVendorService = async ({ productId, action, reason }) => {
+  // Fetch product to get details
+  const product = await Product.findById(productId).populate("user", "firstName lastName userType");
+  if (!product) throw new Error("Product not found");
 
-    if (!vendorsMap.has(userId)) {
-      vendorsMap.set(userId, {
-        shopName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Unknown Vendor",
-        productType: product.name || "Unknown Product",
-        cost: product.cost || 0,
-        rating: calculateAverageRating(product.ratings || []),
-        action: "Dropdown",
-        reason: "",
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
-        productsCount: 1,
-      });
-    } else {
-      const existing = vendorsMap.get(userId);
-      existing.productType += `, ${product.name}`;
-      existing.productsCount += 1;
-      vendorsMap.set(userId, existing);
-    }
-  });
+  
+  const userId = product.user._id;
 
-  return Array.from(vendorsMap.values());
+  // Check if vendor entry already exists
+  let vendor = await repo.findVendorByProductAndUser(productId, userId);
+  const vendorData = {
+     productId: product._id, // include product ID
+    shopName: `${product.user?.firstName || ""} ${product.user?.lastName || ""}`.trim() || "Unknown Vendor",
+    productType: product.name,
+    cost: product.cost,
+    action,
+    reason,
+    user: product.user._id,
+    userType: product.user.userType,
+  };
+
+  if (vendor) {
+    // Update existing
+    vendor = await repo.updateVendor(vendor._id, { action, reason });
+  } else {
+     vendor=await repo.createProductVendor(vendorData);
+  }
+  return vendor;
 };

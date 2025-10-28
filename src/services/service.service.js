@@ -190,7 +190,7 @@ export const fetchServiceCategoryService = async (serviceId) => {
   if (!service.category) throw new ApiError(404, "Category not found for this service");
 
   return {
-    // serviceId: service._id,
+    serviceId: service._id,
     // serviceName: service.name,
     // categoryId: service.category._id,
     categoryName: service.category.name

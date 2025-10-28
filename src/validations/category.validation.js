@@ -14,7 +14,6 @@ export const addCategorySchema = Joi.object({
 export const addProductCategorySchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   description: Joi.string().max(500).optional().allow(""),
-  
 });
 
 // Get service by ID
