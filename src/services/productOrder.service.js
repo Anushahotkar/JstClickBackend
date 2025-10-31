@@ -12,7 +12,10 @@ export const getOrders = async (startDate, endDate, status) => {
       ? `${order.customer.firstName} ${order.customer.lastName}`
       : null,
     vendorType:order.vendorType,
-    vendorName: order.vendor ? `${order.vendor.firstName} ${order.vendor.lastName}` : null,
+    vendorName:  order.assignedByType === "Admin" && order.vendor
+        ? `${order.vendor.firstName} ${order.vendor.lastName}`
+        : null,
+ 
     productName: order.productName || (order.product ? order.product.name : null),
     quantity: order.quantity,
     cost: order.cost,
@@ -55,6 +58,7 @@ export const getProductPosterDetails = async (productName) => {
 
     const rating = u.userType === "Admin" ? 5 : 0; // ✅ 5 for Admins, static (4) for Users
     return {
+      id:u._id,
       name: `${u.firstName} ${u.lastName}`,
       phone: u.phone,
       rating,
@@ -66,8 +70,20 @@ export const getProductPosterDetails = async (productName) => {
   });
 };
 
-export const assignVendorService = async (orderId, vendorId, vendorType) => {
-  const updatedOrder = await orderRepo.assignVendorToOrder(orderId, vendorId, vendorType);
+export const assignVendorService = async (
+  orderId,
+   vendorId,
+    vendorType,
+  assignedBy,
+  assignedByType
+) => {
+  const updatedOrder = await orderRepo.assignVendorToOrder(
+    orderId,
+     vendorId,
+      vendorType,
+      assignedBy,
+    assignedByType
+    );
 
   if (!updatedOrder) {
     throw new ApiError(404, "Order not found");
@@ -78,6 +94,7 @@ export const assignVendorService = async (orderId, vendorId, vendorType) => {
     vendorName: updatedOrder.vendor
       ? `${updatedOrder.vendor.firstName} ${updatedOrder.vendor.lastName}`
       : null,
+       assignedByType: updatedOrder.assignedByType,
     vendorType: updatedOrder.vendorType,
     productName: updatedOrder.product?.name || updatedOrder.productName,
     quantity: updatedOrder.quantity,

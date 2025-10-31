@@ -27,6 +27,8 @@ return await ProductOrder.find(filter)
       path: "product",
       select: "name",
     })
+     .populate("assignedBy", 
+      "firstName lastName userType")
     .sort({ orderedOn: -1 }); // latest orders first
 };
 
@@ -40,13 +42,21 @@ export const findProductByNameWithUser = async (productName) => {
     .lean();
 };
 
-export const assignVendorToOrder = async (orderId, vendorId, vendorType) => {
+export const assignVendorToOrder = async (
+  orderId,
+   vendorId,
+   vendorType,
+  assignedBy,
+  assignedByType
+  ) => {
   return await ProductOrder.findByIdAndUpdate(
     orderId,
     {
       vendor: vendorId,
       vendorType,
       status: "Out for Delivery",
+      assignedBy,
+  assignedByType
     },
     { new: true } // Return updated document
   )
@@ -54,6 +64,10 @@ export const assignVendorToOrder = async (orderId, vendorId, vendorType) => {
       path: "vendor",
       select: "firstName lastName",
     })
+    .populate({
+       path: "assignedBy",
+        select: "firstName lastName userType" 
+      })
     .populate({
       path: "product",
       select: "name",

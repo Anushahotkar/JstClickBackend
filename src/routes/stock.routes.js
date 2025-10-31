@@ -2,9 +2,11 @@
 import { Router } from "express";
 import {getItemsByCategoryController,
      getAllCategoriesForStockController,
+     editProductController,
+      editServiceController 
      } from "../controllers/stock.controller.js";
 
-import Joi from "joi";
+
 
 const router = Router();
 
@@ -13,5 +15,9 @@ const router = Router();
 router.get("/category-items/:categoryId", getItemsByCategoryController);
 
 router.get("/categories", getAllCategoriesForStockController);
+
+// Product and Service edit endpoints — IDs passed in URL
+router.put("/edit/product/:productId", editProductController);
+router.put("/edit/service/:serviceId", editServiceController);
 
 export default router;

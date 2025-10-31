@@ -63,7 +63,16 @@ const productOrderSchema = new mongoose.Schema({
     enum: ["Upcoming", "Out for Delivery", "Delivered", "Cancelled", "Not Delivered"],
     default: "Upcoming",
   },
-  
+ assignedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: "assignedByType", // dynamically reference Admin/User
+      default: null,
+    },
+    assignedByType: {
+      type: String,
+      enum: ["User", "Admin", null],
+      default: null,
+    },
   // Automatically generated timestamp for creation
   createdAt: {
     type: Date,

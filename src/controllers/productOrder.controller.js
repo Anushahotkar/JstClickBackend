@@ -51,8 +51,20 @@ export const assignVendorController = [
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     const { vendorId, vendorType } = req.body;
+ const assignedBy = req.user?._id;
+    const assignedByType = req.user?.userType;
 
-    const updatedOrder = await assignVendorService(orderId, vendorId, vendorType);
+if (!assignedBy || !assignedByType) {
+      throw new ApiError(401, "Unauthorized: missing user token");
+    }
+
+    const updatedOrder = await assignVendorService(
+      orderId,
+       vendorId,
+        vendorType,
+        assignedBy,
+      assignedByType
+      );
 
     res.json(
       new ApiResponse(200, updatedOrder, "Vendor assigned successfully")
